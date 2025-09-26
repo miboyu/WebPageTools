@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具箱 - 米博宇的开发工具集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .tools-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            border: 2px solid #3498db;
+        }
+
+        .coming-soon {
+            opacity: 0.7;
+            cursor: default;
+        }
+
+        .coming-soon::before {
+            background: linear-gradient(90deg, #95a5a6, #7f8c8d);
+        }
+
+        .coming-soon:hover {
+            transform: translateY(-5px) scale(1.01);
+            border: 2px solid #95a5a6;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .tool-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .tool-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .tool-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+
+        .tool-features {
+            margin-bottom: 25px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .feature-item::before {
+            content: '✓';
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .tool-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .tool-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        }
+
+        .tool-meta {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ecf0f1;
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+  
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .tools-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .tool-card {
+                padding: 20px;
+            }
+        }
+
+        /* 动画效果 */
+        .tool-card {
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .tool-card:nth-child(1) { animation-delay: 0.1s; }
+        .tool-card:nth-child(2) { animation-delay: 0.2s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛠️ 开发工具箱</h1>
+        <p>专业的数据可视化与开发工具集合</p>
+    </div>
+
+    <div class="tools-container">
+        <!-- CSV动画对比 -->
+        <a href="CSV动画对比.html" class="tool-card">
+            <span class="tool-icon">📊</span>
+            <h2 class="tool-title">CSV动画对比</h2>
+            <p class="tool-description">
+                专业的时序数据可视化工具，支持多文件对比、动态动画展示和时间序列分析。
+                适用于科研、工程和数据分析场景。
+            </p>
+            <div class="tool-features">
+                <div class="feature-item">多文件实时对比分析</div>
+                <div class="feature-item">动态折线图动画展示</div>
+                <div class="feature-item">时间序列统计功能</div>
+                <div class="feature-item">高质量视频导出</div>
+            </div>
+            <div class="tool-meta">
+                版本 v1.0.0<span class="version-badge">推荐</span>
+            </div>
+        </a>
+
+        <!-- 敬请期待 -->
+        <div class="tool-card coming-soon">
+            <span class="tool-icon">🚧</span>
+            <h2 class="tool-title">敬请期待</h2>
+            <p class="tool-description">
+                更多专业的开发工具和数据可视化工具正在开发中。
+                敬请期待后续更新，为您的开发工作提供更多便利。
+            </p>
+            <div class="tool-features">
+                <div class="feature-item">数据图表生成器</div>
+                <div class="feature-item">代码格式化工具</div>
+                <div class="feature-item">JSON数据处理器</div>
+                <div class="feature-item">更多实用工具</div>
+            </div>
+            <div class="tool-meta">
+                开发中<span class="version-badge">即将推出</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>👨‍💻 作者：<a href="mailto:miboyu@yeah.net">米博宇</a> |
+           📧 联系邮箱：miboyu@yeah.net |
+           🕒 更新时间：2025-09-25</p>
+    </div>
+
+    <script>
+        // 添加卡片点击涟漪效果
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    border-radius: 50%;
+                    background: rgba(52, 152, 219, 0.3);
+                    left: ${x}px;
+                    top: ${y}px;
+                    pointer-events: none;
+                    transform: scale(0);
+                    animation: ripple 0.6s ease-out;
+                `;
+
+                this.style.position = 'relative';
+                this.style.overflow = 'hidden';
+                this.appendChild(ripple);
+
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
