@@ -123,6 +123,46 @@
             color: #666;
         }
 
+        .pending-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #95a5a6;
+        }
+
+        .pending-item::before {
+            content: '⏳';
+            color: #f39c12;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .quote-item {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.1));
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: #2c3e50;
+        }
+
+        .quote-text {
+            font-size: 0.95em;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .quote-author {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            text-align: right;
+            font-style: normal;
+            font-weight: 400;
+        }
+
         .feature-item::before {
             content: '✓';
             color: #27ae60;
@@ -166,7 +206,7 @@
             margin-left: 8px;
         }
 
-  
+
         .footer {
             text-align: center;
             margin-top: 60px;
@@ -182,6 +222,17 @@
 
         .footer a:hover {
             color: white;
+        }
+
+        .visit-counter {
+            margin-top: 10px;
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .visit-counter span {
+            font-weight: 600;
+            color: #3498db;
         }
 
         @media (max-width: 768px) {
@@ -219,7 +270,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>🛠️ 开发工具箱</h1>
+        <h1 id="siteTitle" style="cursor: default;" title="点击小彩蛋">🛠️ 开发工具箱</h1>
         <p>专业的数据可视化与开发工具集合</p>
     </div>
 
@@ -244,7 +295,7 @@
         </a>
 
         <!-- 敬请期待 -->
-        <div class="tool-card coming-soon">
+        <div class="tool-card coming-soon" id="comingSoonCard">
             <span class="tool-icon">🚧</span>
             <h2 class="tool-title">敬请期待</h2>
             <p class="tool-description">
@@ -252,10 +303,10 @@
                 敬请期待后续更新，为您的开发工作提供更多便利。
             </p>
             <div class="tool-features">
-                <div class="feature-item">数据图表生成器</div>
-                <div class="feature-item">代码格式化工具</div>
-                <div class="feature-item">JSON数据处理器</div>
-                <div class="feature-item">更多实用工具</div>
+                <div class="quote-item">
+                    <div class="quote-text">"Talk is cheap. Show me the code."</div>
+                    <div class="quote-author">— Linus Torvalds</div>
+                </div>
             </div>
             <div class="tool-meta">
                 开发中<span class="version-badge">即将推出</span>
@@ -264,14 +315,455 @@
     </div>
 
     <div class="footer">
-        <p>👨‍💻 作者：<a href="mailto:miboyu@yeah.net">米博宇</a> |
-           📧 联系邮箱：miboyu@yeah.net |
+        <p>👨‍💻 作者：<span id="authorName" style="cursor: pointer; color: rgba(255, 255, 255, 0.9); font-weight: 600;" title="点击有惊喜">米博宇</span> |
+           📧 联系邮箱：<a href="mailto:miboyu@yeah.net" style="color: rgba(255, 255, 255, 0.9); text-decoration: none;" title="反馈意见">miboyu@yeah.net</a> |
            🕒 更新时间：2025-09-25</p>
+        <p class="visit-counter">
+            📊 网站访问统计：<span id="visitCount">加载中...</span>
+        </p>
     </div>
 
     <script>
-        // 添加卡片点击涟漪效果
-        document.querySelectorAll('.tool-card').forEach(card => {
+        // 网站访问统计功能
+        function updateVisitCounter() {
+            const counterKey = 'siteVisitCount';
+            const lastVisitKey = 'lastVisitDate';
+            const today = new Date().toDateString();
+
+            // 获取当前访问次数
+            let visitCount = parseInt(localStorage.getItem(counterKey) || '0');
+            const lastVisit = localStorage.getItem(lastVisitKey);
+
+            // 检查是否是今天第一次访问
+            if (lastVisit !== today) {
+                visitCount++;
+                localStorage.setItem(counterKey, visitCount.toString());
+                localStorage.setItem(lastVisitKey, today);
+            }
+
+            // 更新显示
+            const visitCountElement = document.getElementById('visitCount');
+            if (visitCountElement) {
+                visitCountElement.textContent = `${visitCount} 次访问 (今日第${lastVisit === today ? 1 : '首次'}访问)`;
+            }
+        }
+
+        // 显示古诗名句 - 移到全局作用域
+        function showPoemToast(poem) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, rgba(44, 62, 80, 0.95), rgba(52, 73, 94, 0.95));
+                color: white;
+                padding: 25px 35px;
+                border-radius: 15px;
+                font-size: 16px;
+                line-height: 1.6;
+                text-align: center;
+                max-width: 400px;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                z-index: 10000;
+                animation: poemToastAnimation 4s ease-in-out forwards;
+                font-family: 'KaiTi', 'STKaiti', ' serif';
+            `;
+
+            // 添加古诗样式 - 移除标题，只显示诗词内容
+            const poemLines = poem.split(' - ');
+            toast.innerHTML = `
+                <div style="font-size: 18px; margin-bottom: 8px; line-height: 1.5;">${poemLines[0]}</div>
+                <div style="font-size: 14px; opacity: 0.8; font-style: italic;">—— ${poemLines[1]}</div>
+            `;
+
+            document.body.appendChild(toast);
+
+            // 4秒后自动移除
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 4000);
+        }
+
+        // 创建特殊爱心元素 - 移到全局作用域
+        function createSpecialHeart(x, y, emoji) {
+            const heart = document.createElement('div');
+            heart.className = 'special-heart';
+            heart.innerHTML = emoji;
+
+            // 随机爱心大小
+            const size = Math.random() * 12 + 18; // 18-30px
+            heart.style.fontSize = size + 'px';
+
+            // 设置位置
+            heart.style.left = (x - size / 2) + 'px';
+            heart.style.top = (y - size / 2) + 'px';
+
+            // 随机动画延迟
+            heart.style.animationDelay = Math.random() * 0.3 + 's';
+
+            document.body.appendChild(heart);
+
+            // 动画结束后移除元素
+            setTimeout(() => {
+                if (heart.parentNode) {
+                    heart.parentNode.removeChild(heart);
+                }
+            }, 2200);
+        }
+
+        // 显示敬请期待提示 - 移到全局作用域
+        function showComingSoonToast() {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, rgba(52, 152, 219, 0.95), rgba(41, 128, 185, 0.95));
+                color: white;
+                padding: 20px 30px;
+                border-radius: 15px;
+                font-size: 16px;
+                line-height: 1.5;
+                text-align: center;
+                max-width: 300px;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                z-index: 10000;
+                animation: comingSoonToastAnimation 3s ease-in-out forwards;
+            `;
+
+            toast.innerHTML = `
+                <div style="font-size: 24px; margin-bottom: 10px;">🚧</div>
+                <div style="font-size: 16px; font-weight: 600;">客观请耐心等待哦~</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-top: 5px;">作者正在抽时间开发💻</div>
+            `;
+
+            document.body.appendChild(toast);
+
+            // 3秒后自动移除
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 3000);
+        }
+
+        // 创建爱心元素 - 添加缺失的函数
+        function createHeart(x, y) {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '❤️';
+
+            // 随机爱心大小
+            const size = Math.random() * 16 + 14; // 14-30px
+            heart.style.fontSize = size + 'px';
+
+            // 设置位置
+            heart.style.left = (x - size / 2) + 'px';
+            heart.style.top = (y - size / 2) + 'px';
+
+            // 随机动画延迟
+            heart.style.animationDelay = Math.random() * 0.2 + 's';
+
+            document.body.appendChild(heart);
+
+            // 动画结束后移除元素
+            setTimeout(() => {
+                if (heart.parentNode) {
+                    heart.parentNode.removeChild(heart);
+                }
+            }, 1800);
+        }
+
+        // 彩蛋功能初始化
+        function initEasterEggs() {
+            // 古诗名句彩蛋
+            const poems = [
+                // 唐诗名句
+                "海内存知己，天涯若比邻。 - 王勃《送杜少府之任蜀州》",
+                "落霞与孤鹜齐飞，秋水共长天一色。 - 王勃《滕王阁序》",
+                "会当凌绝顶，一览众山小。 - 杜甫《望岳》",
+                "天生我材必有用，千金散尽还复来。 - 李白《将进酒》",
+                "君不见黄河之水天上来，奔流到海不复回。 - 李白《将进酒》",
+                "长风破浪会有时，直挂云帆济沧海。 - 李白《行路难》",
+                "安能摧眉折腰事权贵，使我不得开心颜！ - 李白《梦游天姥吟留别》",
+                "抽刀断水水更流，举杯消愁愁更愁。 - 李白《宣州谢朓楼饯别校书叔云》",
+                "天生我材必有用，千金散尽还复来。 - 李白《将进酒》",
+                "人生得意须尽欢，莫使金樽空对月。 - 李白《将进酒》",
+                "海上生明月，天涯共此时。 - 张九龄《望月怀远》",
+                "春风得意马蹄疾，一日看尽长安花。 - 孟郊《登科后》",
+                "沉舟侧畔千帆过，病树前头万木春。 - 刘禹锡《酬乐天扬州初逢席上见赠》",
+                "东边日出西边雨，道是无晴却有晴。 - 刘禹锡《竹枝词》",
+                "山重水复疑无路，柳暗花明又一村。 - 陆游《游山西村》",
+                "纸上得来终觉浅，绝知此事要躬行。 - 陆游《冬夜读书示子聿》",
+                "夜阑卧听风吹雨，铁马冰河入梦来。 - 陆游《十一月四日风雨大作》",
+                "王师北定中原日，家祭无忘告乃翁。 - 陆游《示儿》",
+                "小荷才露尖尖角，早有蜻蜓立上头。 - 杨万里《小池》",
+                "春色满园关不住，一枝红杏出墙来。 - 叶绍翁《游园不值》",
+                "等闲识得东风面，万紫千红总是春。 - 朱熹《春日》",
+                "问渠那得清如许，为有源头活水来。 - 朱熹《观书有感》",
+                "忽如一夜春风来，千树万树梨花开。 - 岑参《白雪歌送武判官归京》",
+                "欲穷千里目，更上一层楼。 - 王之涣《登鹳雀楼》",
+                "白日依山尽，黄河入海流。 - 王之涣《登鹳雀楼》",
+                "春眠不觉晓，处处闻啼鸟。 - 孟浩然《春晓》",
+                "野火烧不尽，春风吹又生。 - 白居易《赋得古原草送别》",
+                "同是天涯沦落人，相逢何必曾相识！ - 白居易《琵琶行》",
+                "在天愿作比翼鸟，在地愿为连理枝。 - 白居易《长恨歌》",
+                "天长地久有时尽，此恨绵绵无绝期。 - 白居易《长恨歌》",
+                "回眸一笑百媚生，六宫粉黛无颜色。 - 白居易《长恨歌》",
+                "春蚕到死丝方尽，蜡炬成灰泪始干。 - 李商隐《无题》",
+                "身无彩凤双飞翼，心有灵犀一点通。 - 李商隐《无题》",
+                "夕阳无限好，只是近黄昏。 - 李商隐《乐游原》",
+                "何当共剪西窗烛，却话巴山夜雨时。 - 李商隐《夜雨寄北》",
+                "锄禾日当午，汗滴禾下土。 - 李绅《悯农》",
+                "谁知盘中餐，粒粒皆辛苦。 - 李绅《悯农》",
+                "清明时节雨纷纷，路上行人欲断魂。 - 杜牧《清明》",
+                "南朝四百八十寺，多少楼台烟雨中。 - 杜牧《江南春》",
+                "商女不知亡国恨，隔江犹唱后庭花。 - 杜牧《泊秦淮》",
+                "停车坐爱枫林晚，霜叶红于二月花。 - 杜牧《山行》",
+                "醉卧沙场君莫笑，古来征战几人回。 - 王翰《凉州词》",
+                "葡萄美酒夜光杯，欲饮琵琶马上催。 - 王翰《凉州词》",
+                "羌笛何须怨杨柳，春风不度玉门关。 - 王之涣《凉州词》",
+                "黄河远上白云间，一片孤城万仞山。 - 王之涣《凉州词》",
+                "秦时明月汉时关，万里长征人未还。 - 王昌龄《出塞》",
+                "洛阳亲友如相问，一片冰心在玉壶。 - 王昌龄《芙蓉楼送辛渐》",
+                "黄沙百战穿金甲，不破楼兰终不还。 - 王昌龄《从军行》",
+                "忽如一夜春风来，千树万树梨花开。 - 岑参《白雪歌送武判官归京》",
+                "今夜偏知春气暖，虫声新透绿窗纱。 - 刘方平《月夜》",
+                "柴门闻犬吠，风雪夜归人。 - 刘长卿《逢雪宿芙蓉山主人》",
+
+                // 宋词名句
+                "人生自古谁无死，留取丹心照汗青。 - 文天祥《过零丁洋》",
+                "问君能有几多愁，恰似一江春水向东流。 - 李煜《虞美人》",
+                "但愿人长久，千里共婵娟。 - 苏轼《水调歌头》",
+                "大江东去，浪淘尽，千古风流人物。 - 苏轼《念奴娇·赤壁怀古》",
+                "明月几时有，把酒问青天。 - 苏轼《水调歌头》",
+                "人有悲欢离合，月有阴晴圆缺，此事古难全。 - 苏轼《水调歌头》",
+                "十年生死两茫茫，不思量，自难忘。 - 苏轼《江城子》",
+                "枝上柳绵吹又少，天涯何处无芳草。 - 苏轼《蝶恋花》",
+                "竹外桃花三两枝，春江水暖鸭先知。 - 苏轼《惠崇春江晚景》",
+                "不识庐山真面目，只缘身在此山中。 - 苏轼《题西林壁》",
+                "春风又绿江南岸，明月何时照我还？ - 王安石《泊船瓜洲》",
+                "春风又绿江南岸，明月何时照我还？ - 王安石《泊船瓜洲》",
+                "不畏浮云遮望眼，自缘身在最高层。 - 王安石《登飞来峰》",
+                "两情若是久长时，又岂在朝朝暮暮。 - 秦观《鹊桥仙》",
+                "金风玉露一相逢，便胜却人间无数。 - 秦观《鹊桥仙》",
+                "衣带渐宽终不悔，为伊消得人憔悴。 - 柳永《蝶恋花》",
+                "今宵酒醒何处？杨柳岸，晓风残月。 - 柳永《雨霖铃》",
+                "多情自古伤离别，更那堪，冷落清秋节！ - 柳永《雨霖铃》",
+                "众里寻他千百度，蓦然回首，那人却在灯火阑珊处。 - 辛弃疾《青玉案》",
+                "醉里挑灯看剑，梦回吹角连营。 - 辛弃疾《破阵子》",
+                "了却君王天下事，赢得生前身后名。 - 辛弃疾《破阵子》",
+                "稻花香里说丰年，听取蛙声一片。 - 辛弃疾《西江月》",
+                "少年不识愁滋味，爱上层楼。 - 辛弃疾《丑奴儿》",
+                "寻寻觅觅，冷冷清清，凄凄惨惨戚戚。 - 李清照《声声慢》",
+                "莫道不消魂，帘卷西风，人比黄花瘦。 - 李清照《醉花阴》",
+                "此情无计可消除，才下眉头，却上心头。 - 李清照《一剪梅》",
+                "物是人非事事休，欲语泪先流。 - 李清照《武陵春》",
+                "昨夜雨疏风骤，浓睡不消残酒。 - 李清照《如梦令》",
+                "知否，知否？应是绿肥红瘦。 - 李清照《如梦令》",
+                "红酥手，黄縢酒，满城春色宫墙柳。 - 陆游《钗头凤》",
+                "山盟虽在，锦书难托。 - 陆游《钗头凤》",
+                "零落成泥碾作尘，只有香如故。 - 陆游《卜算子》",
+                "无情不似多情苦，一寸还成千万缕。 - 晏殊《玉楼春》",
+                "无可奈何花落去，似曾相识燕归来。 - 晏殊《浣溪沙》",
+                "昨夜西风凋碧树，独上高楼，望尽天涯路。 - 晏殊《蝶恋花》",
+                "今宵酒醒何处？杨柳岸，晓风残月。 - 柳永《雨霖铃》",
+
+                // 先秦经典
+                "关关雎鸠，在河之洲。窈窕淑女，君子好逑。 - 《诗经·关雎》",
+                "蒹葭苍苍，白露为霜。所谓伊人，在水一方。 - 《诗经·蒹葭》",
+                "投我以桃，报之以李。 - 《诗经·大雅》",
+                "他山之石，可以攻玉。 - 《诗经·小雅》",
+                "路漫漫其修远兮，吾将上下而求索。 - 屈原《离骚》",
+                "长太息以掩涕兮，哀民生之多艰。 - 屈原《离骚》",
+                "亦余心之所善兮，虽九死其犹未悔。 - 屈原《离骚》",
+                "举世皆浊我独清，众人皆醉我独醒。 - 屈原《渔父》",
+
+                // 汉魏六朝
+                "对酒当歌，人生几何！譬如朝露，去日苦多。 - 曹操《短歌行》",
+                "老骥伏枥，志在千里。烈士暮年，壮心不已。 - 曹操《龟虽寿》",
+                "捐躯赴国难，视死忽如归。 - 曹植《白马篇》",
+                "本是同根生，相煎何太急。 - 曹植《七步诗》",
+                "采菊东篱下，悠然见南山。 - 陶渊明《饮酒》",
+                "种豆南山下，草盛豆苗稀。 - 陶渊明《归园田居》",
+                "久在樊笼里，复得返自然。 - 陶渊明《归园田居》",
+                "山气日夕佳，飞鸟相与还。 - 陶渊明《饮酒》",
+                "结庐在人境，而无车马喧。 - 陶渊明《饮酒》",
+                "少无适俗韵，性本爱丘山。 - 陶渊明《归园田居》",
+                "落霞与孤鹜齐飞，秋水共长天一色。 - 王勃《滕王阁序》",
+                "渔舟唱晚，响穷彭蠡之滨；雁阵惊寒，声断衡阳之浦。 - 王勃《滕王阁序》",
+                "老当益壮，宁移白首之心？穷且益坚，不坠青云之志。 - 王勃《滕王阁序》",
+
+                // 更多唐诗
+                "月落乌啼霜满天，江枫渔火对愁眠。 - 张继《枫桥夜泊》",
+                "姑苏城外寒山寺，夜半钟声到客船。 - 张继《枫桥夜泊》",
+                "春潮带雨晚来急，野渡无人舟自横。 - 韦应物《滁州西涧》",
+                "独在异乡为异客，每逢佳节倍思亲。 - 王维《九月九日忆山东兄弟》",
+                "劝君更尽一杯酒，西出阳关无故人。 - 王维《送元二使安西》",
+                "空山新雨后，天气晚来秋。 - 王维《山居秋暝》",
+                "明月松间照，清泉石上流。 - 王维《山居秋暝》",
+                "红豆生南国，春来发几枝。 - 王维《相思》",
+                "愿君多采撷，此物最相思。 - 王维《相思》",
+                "遥知兄弟登高处，遍插茱萸少一人。 - 王维《九月九日忆山东兄弟》",
+                "劝君更尽一杯酒，西出阳关无故人。 - 王维《送元二使安西》",
+                "大漠孤烟直，长河落日圆。 - 王维《使至塞上》",
+                "江流天地外，山色有无中。 - 王维《汉江临眺》",
+                "行到水穷处，坐看云起时。 - 王维《终南别业》",
+                "深林人不知，明月来相照。 - 王维《竹里馆》",
+                "松下问童子，言师采药去。 - 贾岛《寻隐者不遇》",
+                "只在此山中，云深不知处。 - 贾岛《寻隐者不遇》",
+                "春眠不觉晓，处处闻啼鸟。 - 孟浩然《春晓》",
+                "夜来风雨声，花落知多少。 - 孟浩然《春晓》",
+                "故人具鸡黍，邀我至田家。 - 孟浩然《过故人庄》",
+                "绿树村边合，青山郭外斜。 - 孟浩然《过故人庄》",
+                "开轩面场圃，把酒话桑麻。 - 孟浩然《过故人庄》",
+                "待到重阳日，还来就菊花。 - 孟浩然《过故人庄》",
+                "气蒸云梦泽，波撼岳阳城。 - 孟浩然《望洞庭湖赠张丞相》",
+                "野旷天低树，江清月近人。 - 孟浩然《宿建德江》",
+                "床前明月光，疑是地上霜。 - 李白《静夜思》",
+                "举头望明月，低头思故乡。 - 李白《静夜思》",
+                "小时不识月，呼作白玉盘。 - 李白《古朗月行》",
+                "又疑瑶台镜，飞在青云端。 - 李白《古朗月行》",
+                "朝辞白帝彩云间，千里江陵一日还。 - 李白《早发白帝城》",
+                "两岸猿声啼不住，轻舟已过万重山。 - 李白《早发白帝城》",
+                "故人西辞黄鹤楼，烟花三月下扬州。 - 李白《黄鹤楼送孟浩然之广陵》",
+                "孤帆远影碧空尽，唯见长江天际流。 - 李白《黄鹤楼送孟浩然之广陵》",
+                "飞流直下三千尺，疑是银河落九天。 - 李白《望庐山瀑布》",
+                "桃花潭水深千尺，不及汪伦送我情。 - 李白《赠汪伦》",
+                "李白乘舟将欲行，忽闻岸上踏歌声。 - 李白《赠汪伦》",
+                "两个黄鹂鸣翠柳，一行白鹭上青天。 - 杜甫《绝句》",
+                "窗含西岭千秋雪，门泊东吴万里船。 - 杜甫《绝句》",
+                "好雨知时节，当春乃发生。 - 杜甫《春夜喜雨》",
+                "随风潜入夜，润物细无声。 - 杜甫《春夜喜雨》",
+                "晓看红湿处，花重锦官城。 - 杜甫《春夜喜雨》",
+                "国破山河在，城春草木深。 - 杜甫《春望》",
+                "感时花溅泪，恨别鸟惊心。 - 杜甫《春望》",
+                "烽火连三月，家书抵万金。 - 杜甫《春望》",
+                "白头搔更短，浑欲不胜簪。 - 杜甫《春望》",
+                "岱宗夫如何？齐鲁青未了。 - 杜甫《望岳》",
+                "造化钟神秀，阴阳割昏晓。 - 杜甫《望岳》",
+                "荡胸生层云，决眦入归鸟。 - 杜甫《望岳》",
+                "国破山河在，城春草木深。 - 杜甫《春望》",
+                "感时花溅泪，恨别鸟惊心。 - 杜甫《春望》",
+                "露从今夜白，月是故乡明。 - 杜甫《月夜忆舍弟》",
+                "星垂平野阔，月涌大江流。 - 杜甫《旅夜书怀》",
+                "无边落木萧萧下，不尽长江滚滚来。 - 杜甫《登高》",
+                "万里悲秋常作客，百年多病独登台。 - 杜甫《登高》",
+                "艰难苦恨繁霜鬓，潦倒新停浊酒杯。 - 杜甫《登高》",
+                "出师未捷身先死，长使英雄泪满襟。 - 杜甫《蜀相》",
+                "映阶碧草自春色，隔叶黄鹂空好音。 - 杜甫《蜀相》",
+                "三顾频烦天下计，两朝开济老臣心。 - 杜甫《蜀相》",
+                "安得广厦千万间，大庇天下寒士俱欢颜！ - 杜甫《茅屋为秋风所破歌》"
+            ];
+
+            // 标题事件处理 - 只在点击文字时触发
+            const siteTitle = document.getElementById('siteTitle');
+            if (siteTitle) {
+                // 创建临时span来测量实际文字宽度
+                function getTextMetrics() {
+                    const tempSpan = document.createElement('span');
+                    tempSpan.style.cssText = `
+                        font-size: ${window.getComputedStyle(siteTitle).fontSize};
+                        font-weight: ${window.getComputedStyle(siteTitle).fontWeight};
+                        font-family: ${window.getComputedStyle(siteTitle).fontFamily};
+                        white-space: nowrap;
+                        visibility: hidden;
+                        position: absolute;
+                    `;
+                    tempSpan.textContent = siteTitle.textContent;
+                    document.body.appendChild(tempSpan);
+
+                    const actualTextWidth = tempSpan.offsetWidth;
+                    const rect = siteTitle.getBoundingClientRect();
+                    const textStartX = (rect.width - actualTextWidth) / 2;
+                    const textEndX = textStartX + actualTextWidth;
+
+                    // 移除临时元素
+                    document.body.removeChild(tempSpan);
+
+                    return { actualTextWidth, textStartX, textEndX, rect };
+                }
+
+                // 鼠标移动事件 - 动态改变鼠标样式
+                siteTitle.addEventListener('mousemove', function(e) {
+                    const { textStartX, textEndX } = getTextMetrics();
+                    const mouseX = e.clientX - this.getBoundingClientRect().left;
+
+                    // 如果鼠标在文字区域内，显示pointer样式
+                    if (mouseX >= textStartX && mouseX <= textEndX) {
+                        this.style.cursor = 'pointer';
+                    } else {
+                        this.style.cursor = 'default';
+                    }
+                });
+
+                // 鼠标离开标题时恢复默认样式
+                siteTitle.addEventListener('mouseleave', function() {
+                    this.style.cursor = 'default';
+                });
+
+                // 点击事件
+                siteTitle.addEventListener('click', function(e) {
+                    const rect = siteTitle.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const { textStartX, textEndX } = getTextMetrics();
+
+                    // 只有在点击文本区域时才触发古诗特效
+                    if (clickX >= textStartX && clickX <= textEndX) {
+                        const randomPoem = poems[Math.floor(Math.random() * poems.length)];
+                        showPoemToast(randomPoem);
+                        e.stopPropagation(); // 阻止事件冒泡，避免触发爱心动画
+                    }
+                });
+            }
+
+            // 作者名点击事件
+            const authorName = document.getElementById('authorName');
+            if (authorName) {
+                authorName.addEventListener('click', function() {
+                    // 创建特殊爱心动画
+                    const specialEmojis = ['💜', '💖', '💝', '💗', '💓', '💕', '💟', '❤️', '💛', '💚', '💙'];
+                    for (let i = 0; i < 7; i++) {
+                        setTimeout(() => {
+                            const rect = this.getBoundingClientRect();
+                            const offsetX = (Math.random() - 0.5) * 120;
+                            const offsetY = (Math.random() - 0.5) * 60;
+                            createSpecialHeart(rect.left + rect.width / 2 + offsetX, rect.top + rect.height / 2 + offsetY, specialEmojis[Math.floor(Math.random() * specialEmojis.length)]);
+                        }, i * 60); // 减少延迟，让动画更紧凑
+                    }
+                });
+            }
+
+            // 敬请期待卡片点击事件
+            const comingSoonCard = document.getElementById('comingSoonCard');
+            if (comingSoonCard) {
+                comingSoonCard.addEventListener('click', function(e) {
+                    e.preventDefault(); // 防止默认行为
+                    e.stopPropagation(); // 阻止事件冒泡
+                    showComingSoonToast();
+                });
+                console.log('敬请期待卡片点击事件已绑定');
+            } else {
+                console.log('未找到敬请期待卡片元素');
+            }
+        }
+
+        // 页面加载时更新访问统计
+        document.addEventListener('DOMContentLoaded', function() {
+            updateVisitCounter();
+            initEasterEggs();
+        });
+
+        // 添加卡片点击涟漪效果 - 排除敬请期待卡片
+        document.querySelectorAll('.tool-card:not(.coming-soon)').forEach(card => {
             card.addEventListener('click', function(e) {
                 const ripple = document.createElement('span');
                 const rect = this.getBoundingClientRect();
@@ -311,6 +803,335 @@
             }
         `;
         document.head.appendChild(style);
+
+        // 添加动画样式
+        const animationStyle = document.createElement('style');
+        animationStyle.textContent = `
+            @keyframes comingSoonToastAnimation {
+                0% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.8);
+                }
+                20% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+                80% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.9);
+                }
+            }
+
+            @keyframes poemToastAnimation {
+                0% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.8);
+                }
+                20% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+                80% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.9);
+                }
+            }
+        `;
+        document.head.appendChild(animationStyle);
+
+        // 点击空白处显示爱心动画
+        document.addEventListener('click', function(e) {
+            // 检查点击的是否为空白区域（不是链接、按钮等交互元素）
+            const clickedElement = e.target;
+            const siteTitle = document.getElementById('siteTitle');
+            const isInteractive = clickedElement.tagName === 'A' ||
+                                 clickedElement.tagName === 'BUTTON' ||
+                                 clickedElement.closest('a') ||
+                                 clickedElement.closest('button') ||
+                                 clickedElement.classList.contains('tool-card') ||
+                                 clickedElement.closest('.tool-card');
+
+            // 如果点击的是标题元素本身（而不是文字），显示爱心
+            if (siteTitle && clickedElement === siteTitle) {
+                createHeart(e.clientX, e.clientY);
+                return;
+            }
+
+            if (!isInteractive) {
+                createHeart(e.clientX, e.clientY);
+            }
+        });
+
+        // 双击空白处创建多个爱心
+        document.addEventListener('dblclick', function(e) {
+            const clickedElement = e.target;
+            const siteTitle = document.getElementById('siteTitle');
+            const isInteractive = clickedElement.tagName === 'A' ||
+                                 clickedElement.tagName === 'BUTTON' ||
+                                 clickedElement.closest('a') ||
+                                 clickedElement.closest('button') ||
+                                 clickedElement.classList.contains('tool-card') ||
+                                 clickedElement.closest('.tool-card');
+
+            // 如果点击的是标题元素本身（而不是文字），显示爱心
+            if (siteTitle && clickedElement === siteTitle) {
+                // 创建3-6个爱心
+                const heartCount = Math.floor(Math.random() * 4) + 3;
+                for (let i = 0; i < heartCount; i++) {
+                    setTimeout(() => {
+                        const offsetX = (Math.random() - 0.5) * 100;
+                        const offsetY = (Math.random() - 0.5) * 50;
+                        createHeart(e.clientX + offsetX, e.clientY + offsetY);
+                    }, i * 80); // 减少延迟
+                }
+                return;
+            }
+
+            if (!isInteractive) {
+                // 创建3-6个爱心
+                const heartCount = Math.floor(Math.random() * 4) + 3;
+                for (let i = 0; i < heartCount; i++) {
+                    setTimeout(() => {
+                        const offsetX = (Math.random() - 0.5) * 100;
+                        const offsetY = (Math.random() - 0.5) * 50;
+                        createHeart(e.clientX + offsetX, e.clientY + offsetY);
+                    }, i * 80); // 减少延迟
+                }
+            }
+        });
     </script>
-</body>
+
+    <!-- 爱心动画样式 -->
+    <style>
+        .heart {
+            position: fixed;
+            pointer-events: none;
+            font-size: 20px;
+            color: #e74c3c;
+            animation: heartFloat 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            z-index: 9999;
+            text-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+
+        .special-heart {
+            position: fixed;
+            pointer-events: none;
+            font-size: 25px;
+            animation: specialHeartFloat 2.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            z-index: 9999;
+            text-shadow: 0 0 12px rgba(155, 89, 182, 0.6);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+
+        @keyframes heartFloat {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(0.2) rotate(-15deg);
+            }
+            8% {
+                opacity: 0.4;
+                transform: translateY(-8px) scale(0.5) rotate(-8deg);
+            }
+            16% {
+                opacity: 0.8;
+                transform: translateY(-16px) scale(0.8) rotate(-3deg);
+            }
+            24% {
+                opacity: 1;
+                transform: translateY(-24px) scale(1.05) rotate(2deg);
+            }
+            32% {
+                opacity: 1;
+                transform: translateY(-32px) scale(1.1) rotate(5deg);
+            }
+            40% {
+                opacity: 0.95;
+                transform: translateY(-40px) scale(1.05) rotate(3deg);
+            }
+            48% {
+                opacity: 0.9;
+                transform: translateY(-48px) scale(1) rotate(1deg);
+            }
+            56% {
+                opacity: 0.85;
+                transform: translateY(-56px) scale(0.95) rotate(-1deg);
+            }
+            64% {
+                opacity: 0.75;
+                transform: translateY(-64px) scale(0.9) rotate(-2deg);
+            }
+            72% {
+                opacity: 0.65;
+                transform: translateY(-72px) scale(0.8) rotate(-1deg);
+            }
+            80% {
+                opacity: 0.5;
+                transform: translateY(-80px) scale(0.7) rotate(0deg);
+            }
+            88% {
+                opacity: 0.3;
+                transform: translateY(-86px) scale(0.55) rotate(0deg);
+            }
+            96% {
+                opacity: 0.1;
+                transform: translateY(-89px) scale(0.35) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-90px) scale(0.2) rotate(0deg);
+            }
+        }
+
+        @keyframes specialHeartFloat {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(0.15) rotate(-25deg);
+            }
+            6% {
+                opacity: 0.3;
+                transform: translateY(-7px) scale(0.4) rotate(-10deg);
+            }
+            12% {
+                opacity: 0.6;
+                transform: translateY(-14px) scale(0.7) rotate(5deg);
+            }
+            18% {
+                opacity: 0.85;
+                transform: translateY(-21px) scale(1) rotate(20deg);
+            }
+            24% {
+                opacity: 1;
+                transform: translateY(-28px) scale(1.25) rotate(35deg);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-35px) scale(1.35) rotate(50deg);
+            }
+            36% {
+                opacity: 0.95;
+                transform: translateY(-42px) scale(1.3) rotate(70deg);
+            }
+            42% {
+                opacity: 0.9;
+                transform: translateY(-49px) scale(1.2) rotate(90deg);
+            }
+            48% {
+                opacity: 0.85;
+                transform: translateY(-56px) scale(1.1) rotate(110deg);
+            }
+            54% {
+                opacity: 0.8;
+                transform: translateY(-63px) scale(1) rotate(135deg);
+            }
+            60% {
+                opacity: 0.75;
+                transform: translateY(-70px) scale(0.9) rotate(160deg);
+            }
+            66% {
+                opacity: 0.65;
+                transform: translateY(-77px) scale(0.8) rotate(185deg);
+            }
+            72% {
+                opacity: 0.55;
+                transform: translateY(-84px) scale(0.7) rotate(210deg);
+            }
+            78% {
+                opacity: 0.45;
+                transform: translateY(-91px) scale(0.6) rotate(240deg);
+            }
+            84% {
+                opacity: 0.35;
+                transform: translateY(-98px) scale(0.5) rotate(270deg);
+            }
+            90% {
+                opacity: 0.25;
+                transform: translateY(-105px) scale(0.4) rotate(300deg);
+            }
+            96% {
+                opacity: 0.1;
+                transform: translateY(-110px) scale(0.3) rotate(330deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-112px) scale(0.2) rotate(360deg);
+            }
+        }
+
+        /* 多种爱心颜色 */
+        .heart:nth-child(odd) {
+            color: #e74c3c;
+        }
+
+        .heart:nth-child(even) {
+            color: #f39c12;
+        }
+
+        .heart:nth-child(3n) {
+            color: #e91e63;
+        }
+
+        .heart:nth-child(4n) {
+            color: #ff6b6b;
+        }
+
+        .heart:nth-child(5n) {
+            color: #ff1744;
+        }
+
+        /* 特殊爱心图标和颜色 */
+        .special-heart:nth-child(odd) {
+            color: #9b59b6;
+        }
+
+        .special-heart:nth-child(even) {
+            color: #8e44ad;
+        }
+
+        .special-heart:nth-child(3n) {
+            color: #e74c3c;
+        }
+
+        .special-heart:nth-child(4n) {
+            color: #f39c12;
+        }
+
+        .special-heart:nth-child(5n) {
+            color: #27ae60;
+        }
+
+        /* 古诗Toast动画 */
+        @keyframes poemToastAnimation {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            80% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+        }
+    </style>
+
+  </body>
 </html>
