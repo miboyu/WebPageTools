@@ -785,7 +785,7 @@
             <h1>CSV动画对比</h1>
             <button class="btn btn-secondary" id="helpBtn">帮助</button>
         </div>
-        <div class="version-info">作者：<a href="mailto:miboyu@yeah.net">米博宇</a> | 版本：v1.0.0</div>
+        <div class="version-info">作者：<a href="mailto:miboyu@yeah.net">米博宇</a> | 版本：v1.0.1</div>
 
         <div class="upload-section" id="uploadSection">
             <div class="upload-prompt" id="uploadPrompt">
@@ -1206,11 +1206,12 @@ Static_Line_B, 15, 15, 15, 15, 15
                 <ul>
                     <li><b>作者：</b>米博宇</li>
                     <li><b>邮箱：</b><a href="mailto:miboyu@yeah.net">miboyu@yeah.net</a></li>
-                    <li><b>版本：</b>v1.0.0 (2025-09-25)</li>
+                    <li><b>版本：</b>v1.0.1 (2025-12-16)</li>
                 </ul>
 
                 <h4>更新日志</h4>
                 <ul>
+                    <li><b>v1.0.1 (2025-12-16)：</b>修复 Windows 平台兼容性问题 - 将所有使用扩展运算符的 Math.min/max 调用改为循环实现，解决大型 CSV 文件在 Windows 浏览器中因参数数量限制导致的 RangeError 异常</li>
                     <li><b>v1.0.0 (2025-09-25)：</b>正式发布版本，完整的多文件对比、时间序列分析、视频导出功能，支持高级缩放系统、浮窗显示模式、文件路径记忆、批量刷新等核心功能</li>
                 </ul>
                 <footer>
