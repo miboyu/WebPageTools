@@ -2666,16 +2666,28 @@ Static_Line_B, 15, 15, 15, 15, 15
                             const xData = file.data[xAxisRow].filter(val => val !== '' && !isNaN(parseFloat(val)));
                             if (xData.length > 0) {
                                 const numericData = xData.map(val => parseFloat(val));
-                                allMinValues.push(Math.min(...numericData));
-                                allMaxValues.push(Math.max(...numericData));
+                                // 使用循环代替扩展运算符,避免Windows下参数数量限制异常
+                                let minVal = numericData[0];
+                                let maxVal = numericData[0];
+                                for (let i = 1; i < numericData.length; i++) {
+                                    if (numericData[i] < minVal) minVal = numericData[i];
+                                    if (numericData[i] > maxVal) maxVal = numericData[i];
+                                }
+                                allMinValues.push(minVal);
+                                allMaxValues.push(maxVal);
                             }
                         }
                     }
 
                     // 使用所有文件中的最小/最大值
                     if (allMinValues.length > 0) {
-                        const min = Math.min(...allMinValues);
-                        const max = Math.max(...allMaxValues);
+                        // 使用循环代替扩展运算符,避免Windows下参数数量限制异常
+                        let min = allMinValues[0];
+                        let max = allMaxValues[0];
+                        for (let i = 1; i < allMinValues.length; i++) {
+                            if (allMinValues[i] < min) min = allMinValues[i];
+                            if (allMaxValues[i] > max) max = allMaxValues[i];
+                        }
 
                         if (!manuallyModified.has('xMin')) {
                             xMinInput.value = min;
@@ -3763,8 +3775,19 @@ Static_Line_B, 15, 15, 15, 15, 15
                             }
                         }
                         if (allXValues.length > 0) {
-                            if (isNaN(xMin)) xMinForAuto = Math.min(...allXValues);
-                            if (isNaN(xMax)) xMaxForAuto = Math.max(...allXValues);
+                            // 使用循环代替扩展运算符,避免Windows下参数数量限制异常
+                            if (isNaN(xMin)) {
+                                xMinForAuto = allXValues[0];
+                                for (let i = 1; i < allXValues.length; i++) {
+                                    if (allXValues[i] < xMinForAuto) xMinForAuto = allXValues[i];
+                                }
+                            }
+                            if (isNaN(xMax)) {
+                                xMaxForAuto = allXValues[0];
+                                for (let i = 1; i < allXValues.length; i++) {
+                                    if (allXValues[i] > xMaxForAuto) xMaxForAuto = allXValues[i];
+                                }
+                            }
                         }
                     }
 
@@ -4593,8 +4616,13 @@ Static_Line_B, 15, 15, 15, 15, 15
                     return null;
                 }
 
-                const max = Math.max(...values);
-                const min = Math.min(...values);
+                // 使用循环代替扩展运算符,避免Windows下参数数量限制异常
+                let max = values[0];
+                let min = values[0];
+                for (let i = 1; i < values.length; i++) {
+                    if (values[i] > max) max = values[i];
+                    if (values[i] < min) min = values[i];
+                }
                 const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
 
                 // 计算标准差
