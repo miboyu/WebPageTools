@@ -318,172 +318,59 @@
         <p>👨‍💻 作者：<span id="authorName" style="cursor: pointer; color: rgba(255, 255, 255, 0.9); font-weight: 600;" title="点击有惊喜">米博宇</span> |
            📧 联系邮箱：<a href="mailto:miboyu@yeah.net" style="color: rgba(255, 255, 255, 0.9); text-decoration: none;" title="反馈意见">miboyu@yeah.net</a> |
            🕒 更新时间：2025-01-08</p>
-        <p class="visit-counter">
-            <span id="busuanzi_container_page_pv">
-                📊 本页总访问量：<span class="busuanzi_value_page_pv">加载中...</span> 次
-            </span>
-            <span style="margin: 0 15px;">|</span>
-            <span id="busuanzi_container_site_pv">
-                🌐 网站总访问量：<span class="busuanzi_value_site_pv">加载中...</span> 次
-            </span>
-            <span style="margin: 0 15px;">|</span>
-            <span id="busuanzi_container_site_uv">
-                👥 网站访客数：<span class="busuanzi_value_site_uv">加载中...</span> 人
-            </span>
+        <p class="visit-counter" id="visitCounter">
+            📊 网站访问量：加载中...
         </p>
     </div>
 
     <script>
-        // 不蒜子访问统计
-        function initBusuanzi() {
+        // 访问统计初始化
+        function initVisitCounter() {
+            const counterContainer = document.getElementById('visitCounter');
+
             // 检测是否是本地文件打开
             const isLocalFile = window.location.protocol === 'file:';
 
             if (isLocalFile) {
-                console.warn('⚠️ 本地文件模式：不蒜子统计仅在通过 HTTP/HTTPS 访问时可用');
+                console.warn('⚠️ 本地文件模式：GitHub 访问统计仅在 HTTP/HTTPS 访问时可用');
 
-                // 本地模式下，显示简单的提示信息
-                const counterContainer = document.querySelector('.visit-counter');
+                // 本地模式显示
                 if (counterContainer) {
                     counterContainer.innerHTML = `
-                        <span style="opacity: 0.8;">
-                            📊 访问统计：<span style="color: rgba(255, 255, 255, 0.7);">本地模式不可用</span>
-                            <span style="margin-left: 15px; font-size: 0.85em; opacity: 0.6;">
-                                💡 部署到 GitHub Pages 后可查看真实访问数据
-                            </span>
+                        📊 访问统计：<span style="color: rgba(255, 255, 255, 0.7);">本地模式不可用</span>
+                        <span style="margin-left: 15px; font-size: 0.85em; opacity: 0.6;">
+                            💡 部署到 GitHub Pages 后可查看真实访问数据
                         </span>
                     `;
                 }
-                return; // 本地模式不加载不蒜子
+                return;
             }
 
-            // 异步加载不蒜子脚本
-            const script = document.createElement('script');
-            script.src = '//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
-            script.async = true;
-
-            script.onload = function() {
-                console.log('✅ 不蒜子统计加载成功');
-
-                // 等待不蒜子更新数据（最多等待5秒）
-                let checkCount = 0;
-                const maxChecks = 10;
-
-                const checkInterval = setInterval(() => {
-                    checkCount++;
-
-                    // 检查数据是否已更新
-                    const pvElement = document.querySelector('.busuanzi_value_page_pv');
-                    const sitePvElement = document.querySelector('.busuanzi_value_site_pv');
-                    const uvElement = document.querySelector('.busuanzi_value_site_uv');
-
-                    const hasData = pvElement && pvElement.textContent !== '加载中...' &&
-                                   sitePvElement && sitePvElement.textContent !== '加载中...' &&
-                                   uvElement && uvElement.textContent !== '加载中...';
-
-                    if (hasData) {
-                        console.log('✅ 不蒜子数据已更新');
-                        clearInterval(checkInterval);
-
-                        // 添加加载完成的样式
-                        document.querySelectorAll('.busuanzi_value_page_pv, .busuanzi_value_site_pv, .busuanzi_value_site_uv').forEach(el => {
-                            el.style.opacity = '1';
-                        });
-                    } else if (checkCount >= maxChecks) {
-                        // 超时未更新
-                        console.warn('⚠️ 不蒜子数据更新超时，可能需要：\n  1. 访问不蒜子官网注册域名\n  2. 等待一段时间让服务器初始化\n  3. 检查网络连接');
-                        clearInterval(checkInterval);
-
-                        // 显示提示信息
-                        if (pvElement && pvElement.textContent === '加载中...') {
-                            pvElement.textContent = '等待数据';
-                        }
-                        if (sitePvElement && sitePvElement.textContent === '加载中...') {
-                            sitePvElement.textContent = '等待数据';
-                        }
-                        if (uvElement && uvElement.textContent === '加载中...') {
-                            uvElement.textContent = '等待数据';
-                        }
-                    }
-                }, 500);
-            };
-
-            script.onerror = function() {
-                console.error('❌ 不蒜子统计加载失败');
-
-                const pvContainer = document.getElementById('busuanzi_container_page_pv');
-                const sitePvContainer = document.getElementById('busuanzi_container_site_pv');
-                const uvContainer = document.getElementById('busuanzi_container_site_uv');
-
-                if (pvContainer) pvContainer.innerHTML = '📊 本页总访问量：网络加载失败';
-                if (sitePvContainer) sitePvContainer.innerHTML = '🌐 网站总访问量：网络加载失败';
-                if (uvContainer) uvContainer.innerHTML = '👥 网站访客数：网络加载失败';
-            };
-
-            document.body.appendChild(script);
+            // 网络模式：显示 GitHub 访问统计徽章
+            if (counterContainer) {
+                counterContainer.innerHTML = `
+                    📊 网站访问量：
+                    <img src="https://hits.dwyl.com/miboyu/WebPageTools.svg" alt="Hits" style="vertical-align: middle; margin: 0 5px; filter: brightness(0) invert(1);">
+                `;
+            }
         }
 
-        // 本地访问统计（增强版，保留作为补充）
+        // 本地访问统计（用于调试）
         function updateVisitCounter() {
             const counterKey = 'siteVisitCount';
             const lastVisitKey = 'lastVisitDate';
-            const firstVisitKey = 'firstVisitDate';
-            const visitHistoryKey = 'visitHistory';
-            const consecutiveDaysKey = 'consecutiveDays';
 
             const today = new Date().toDateString();
-            const now = new Date();
-            const nowStr = now.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-
-            // 获取当前访问次数
             let visitCount = parseInt(localStorage.getItem(counterKey) || '0');
             const lastVisit = localStorage.getItem(lastVisitKey);
-            const firstVisit = localStorage.getItem(firstVisitKey);
 
-            // 获取访问历史
-            let visitHistory = JSON.parse(localStorage.getItem(visitHistoryKey) || '[]');
-
-            // 计算连续访问天数
-            let consecutiveDays = parseInt(localStorage.getItem(consecutiveDaysKey) || '0');
-            const yesterday = new Date(now);
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toDateString();
-
-            // 检查是否是今天第一次访问
             if (lastVisit !== today) {
                 visitCount++;
                 localStorage.setItem(counterKey, visitCount.toString());
                 localStorage.setItem(lastVisitKey, today);
-
-                // 记录首次访问时间
-                if (!firstVisit) {
-                    localStorage.setItem(firstVisitKey, nowStr);
-                }
-
-                // 更新访问历史（保留最近7条）
-                visitHistory.unshift({ date: nowStr, count: visitCount });
-                if (visitHistory.length > 7) {
-                    visitHistory = visitHistory.slice(0, 7);
-                }
-                localStorage.setItem(visitHistoryKey, JSON.stringify(visitHistory));
-
-                // 计算连续访问天数
-                if (lastVisit === yesterdayStr) {
-                    consecutiveDays++;
-                } else if (lastVisit !== today) {
-                    // 中断了，重新计算
-                    consecutiveDays = 1;
-                }
-                localStorage.setItem(consecutiveDaysKey, consecutiveDays.toString());
             }
 
-            // 本地数据仅在控制台输出，不显示在页面上
-            console.log('📊 本地访问统计：');
-            console.log(`   总访问次数：${visitCount} 次`);
-            console.log(`   连续访问：${consecutiveDays} 天`);
-            console.log(`   首次访问：${firstVisit || nowStr}`);
-            console.log(`   上次访问：${lastVisit || '首次'}`);
-            console.log(`   本次状态：${lastVisit === today ? '欢迎回来！' : '今日首次访问'}`);
+            console.log('📊 本地访问统计：', visitCount, '次');
         }
 
         // 显示古诗名句 - 移到全局作用域
@@ -896,7 +783,7 @@
 
         // 页面加载时更新访问统计
         document.addEventListener('DOMContentLoaded', function() {
-            initBusuanzi();        // 初始化不蒜子统计
+            initVisitCounter();     // 初始化访问统计
             updateVisitCounter();    // 更新本地统计
             initEasterEggs();       // 初始化彩蛋功能
         });
