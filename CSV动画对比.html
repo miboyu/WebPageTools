@@ -4,7 +4,221 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSV动画对比</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // === 多 CDN 备份加载机制 ===
+        // 解决 Windows 平台上 CDN 访问问题
+
+        (function() {
+            'use strict';
+
+            // CDN 列表（按优先级排序）- 国内友好 CDN
+            const cdnList = [
+                {
+                    name: 'BootCDN (国内)',
+                    url: 'https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js',
+                    timeout: 8000
+                },
+                {
+                    name: 'Staticfile (七牛云)',
+                    url: 'https://cdn.staticfile.org/Chart.js/4.4.1/chart.umd.min.js',
+                    timeout: 8000
+                },
+                {
+                    name: 'Baomitu (保障性)',
+                    url: 'https://lib.baomitu.com/Chart.js/4.4.1/chart.umd.min.js',
+                    timeout: 8000
+                },
+                {
+                    name: 'jsDelivr (国际)',
+                    url: 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
+                    timeout: 5000
+                },
+                {
+                    name: 'cdnjs (国际)',
+                    url: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js',
+                    timeout: 5000
+                }
+            ];
+
+            let currentCdnIndex = 0;
+            let currentScript = null; // 跟踪当前加载的脚本
+            let loadTimeout = null;
+            let isLoaded = false; // 防止重复加载
+            let isAborted = false; // 防止已中止的加载触发回调
+
+            // 停止当前加载
+            function abortCurrentLoad() {
+                if (currentScript) {
+                    // 移除脚本节点以停止加载
+                    if (currentScript.parentNode) {
+                        currentScript.parentNode.removeChild(currentScript);
+                    }
+                    // 清除事件监听器
+                    currentScript.onload = null;
+                    currentScript.onerror = null;
+                    currentScript = null;
+                }
+                if (loadTimeout) {
+                    clearTimeout(loadTimeout);
+                    loadTimeout = null;
+                }
+                isAborted = true;
+            }
+
+            // 加载 Chart.js 脚本
+            function loadChartJs(cdnIndex) {
+                // 如果已经成功加载，不再尝试
+                if (isLoaded || typeof Chart !== 'undefined') {
+                    console.log('✅ Chart.js 已加载，跳过后续 CDN');
+                    return;
+                }
+
+                if (cdnIndex >= cdnList.length) {
+                    console.error('❌ 所有 CDN 均加载失败！');
+                    showLoadFailedWarning();
+                    return;
+                }
+
+                const cdn = cdnList[cdnIndex];
+                console.log(`📡 尝试从 ${cdn.name} 加载 Chart.js...`);
+
+                // 停止之前的加载
+                abortCurrentLoad();
+                isAborted = false;
+
+                const script = document.createElement('script');
+                currentScript = script;
+                script.async = false; // 保持同步加载以确保执行顺序
+                script.src = cdn.url;
+
+                // 成功加载
+                script.onload = function() {
+                    // 如果已中止，不处理
+                    if (isAborted) {
+                        console.log(`⚠️ ${cdn.name} 加载完成但已被中止`);
+                        return;
+                    }
+
+                    // 清除超时
+                    if (loadTimeout) {
+                        clearTimeout(loadTimeout);
+                        loadTimeout = null;
+                    }
+
+                    // 双重检查 Chart 是否真的加载成功
+                    if (typeof Chart !== 'undefined') {
+                        isLoaded = true;
+                        currentScript = null;
+                        const loadTime = Date.now() - performance.timing.navigationStart;
+                        console.log(`✅ Chart.js 从 ${cdn.name} 加载成功！耗时: ${loadTime}ms`);
+                        window.chartJsLoadStatus = {
+                            isLoaded: true,
+                            loadTime: loadTime,
+                            cdnUsed: cdn.name
+                        };
+                    } else {
+                        console.warn(`⚠️ ${cdn.name} 脚本已加载，但 Chart 对象未定义，尝试下一个 CDN...`);
+                        currentScript = null;
+                        tryNextCdn(cdnIndex);
+                    }
+                };
+
+                // 加载失败
+                script.onerror = function() {
+                    // 如果已中止，不处理
+                    if (isAborted) {
+                        return;
+                    }
+
+                    console.warn(`❌ ${cdn.name} 加载失败，尝试下一个 CDN...`);
+                    currentScript = null;
+                    tryNextCdn(cdnIndex);
+                };
+
+                // 设置超时
+                loadTimeout = setTimeout(() => {
+                    if (isAborted || isLoaded) {
+                        return;
+                    }
+                    console.warn(`⏱️ ${cdn.name} 加载超时 (${cdn.timeout}ms)，尝试下一个 CDN...`);
+                    // 中止当前加载并尝试下一个
+                    abortCurrentLoad();
+                    tryNextCdn(cdnIndex);
+                }, cdn.timeout);
+
+                document.head.appendChild(script);
+            }
+
+            // 尝试下一个 CDN
+            function tryNextCdn(failedIndex) {
+                currentCdnIndex = failedIndex + 1;
+                if (currentCdnIndex < cdnList.length) {
+                    // 短暂延迟后重试
+                    setTimeout(() => {
+                        loadChartJs(currentCdnIndex);
+                    }, 500);
+                } else {
+                    console.error('❌ 所有 CDN 均加载失败！');
+                    showLoadFailedWarning();
+                }
+            }
+
+            // 显示加载失败警告
+            function showLoadFailedWarning() {
+                window.chartJsLoadStatus = {
+                    isLoaded: false,
+                    loadTime: null,
+                    cdnUsed: null
+                };
+
+                // 等待 DOM 加载后显示警告
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', showWarning);
+                } else {
+                    showWarning();
+                }
+            }
+
+            function showWarning() {
+                const warningDiv = document.createElement('div');
+                warningDiv.style.cssText = 'position: fixed; top: 10px; left: 50%; transform: translateX(-50%); ' +
+                    'background: #ff6b6b; color: white; padding: 20px 25px; border-radius: 8px; ' +
+                    'z-index: 10000; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); max-width: 80%;';
+                warningDiv.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 10px;">⚠️ Chart.js 加载失败</div>
+                    <div style="font-size: 13px; line-height: 1.6;">
+                        所有国内/国际 CDN 均无法访问<br>
+                        <strong>可能原因：</strong><br>
+                        • 网络连接断开或限制<br>
+                        • 公司/学校网络策略限制<br>
+                        • 防火墙或安全软件阻止<br>
+                        • DNS 解析问题<br>
+                        <br>
+                        <strong>解决方案：</strong><br>
+                        1. 刷新页面重试 (F5)<br>
+                        2. 检查网络连接是否正常<br>
+                        3. 尝试切换网络（如手机热点）<br>
+                        4. 暂时关闭防火墙/安全软件<br>
+                        5. 按F12查看控制台详细错误信息
+                    </div>
+                `;
+
+                document.body.appendChild(warningDiv);
+
+                // 15秒后自动移除
+                setTimeout(() => {
+                    if (warningDiv.parentNode) {
+                        warningDiv.parentNode.removeChild(warningDiv);
+                    }
+                }, 15000);
+            }
+
+            // 启动加载
+            console.log('🚀 开始加载 Chart.js...');
+            loadChartJs(0);
+
+        })();
+    </script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -354,6 +568,7 @@
         .toast-content {
             flex: 1;
             margin-right: 10px;
+            white-space: pre-line; /* 支持换行符显示，使 \n 能正确渲染 */
         }
 
         .toast-actions {
@@ -785,7 +1000,7 @@
             <h1>CSV动画对比</h1>
             <button class="btn btn-secondary" id="helpBtn">帮助</button>
         </div>
-        <div class="version-info">作者：<a href="mailto:miboyu@yeah.net">米博宇</a> | 版本：v1.0.1</div>
+        <div class="version-info">作者：<a href="mailto:miboyu@yeah.net">米博宇</a> | 版本：v1.0.2</div>
 
         <div class="upload-section" id="uploadSection">
             <div class="upload-prompt" id="uploadPrompt">
@@ -1206,11 +1421,12 @@ Static_Line_B, 15, 15, 15, 15, 15
                 <ul>
                     <li><b>作者：</b>米博宇</li>
                     <li><b>邮箱：</b><a href="mailto:miboyu@yeah.net">miboyu@yeah.net</a></li>
-                    <li><b>版本：</b>v1.0.1 (2025-12-16)</li>
+                    <li><b>版本：</b>v1.0.2 (2025-01-08)</li>
                 </ul>
 
                 <h4>更新日志</h4>
                 <ul>
+                    <li><b>v1.0.2 (2025-01-08)：</b>优化 CDN 加载机制 - 实现多 CDN 自动切换加载系统（支持 BootCDN、Staticfile、Baomitu 等国内 CDN），彻底解决国内网络环境下 Chart.js 库加载失败问题；增强错误诊断功能，提供详细的加载状态提示和解决方案</li>
                     <li><b>v1.0.1 (2025-12-16)：</b>修复 Windows 平台兼容性问题 - 将所有使用扩展运算符的 Math.min/max 调用改为循环实现，解决大型 CSV 文件在 Windows 浏览器中因参数数量限制导致的 RangeError 异常</li>
                     <li><b>v1.0.0 (2025-09-25)：</b>正式发布版本，完整的多文件对比、时间序列分析、视频导出功能，支持高级缩放系统、浮窗显示模式、文件路径记忆、批量刷新等核心功能</li>
                 </ul>
@@ -3723,6 +3939,27 @@ Static_Line_B, 15, 15, 15, 15, 15
             // 生成动画
             function generateChart() {
                 try {
+                    // 检查 Chart.js 是否已加载
+                    if (typeof Chart === 'undefined') {
+                        // 提供详细的诊断信息
+                        const errorMsg = 'Chart.js 库未加载完成\n\n' +
+                            '可能的原因：\n' +
+                            '1. 国内网络访问 CDN 受限\n' +
+                            '2. 网络（公司/学校）限制了外部资源\n' +
+                            '3. 防火墙或安全软件（360、火绒等）阻止了加载\n' +
+                            '4. 网络连接不稳定或 DNS 解析失败\n\n' +
+                            '解决方案：\n' +
+                            '• 等待几秒后再试\n' +
+                            '• 刷新页面 (F5)\n' +
+                            '• 切换网络（如使用手机热点）\n' +
+                            '• 查看浏览器控制台 (F12) 了解详细信息\n' +
+                            '• 暂时关闭防火墙/安全软件测试';
+
+                        showToast('Chart.js 库加载失败，请查看浏览器控制台', 'error', { duration: 10000 });
+                        console.error(errorMsg);
+                        throw new Error(errorMsg);
+                    }
+
                     // 检查是否有文件
                     if (csvFiles.length === 0) {
                         throw new Error('请先上传CSV文件');
