@@ -318,63 +318,9 @@
         <p>👨‍💻 作者：<span id="authorName" style="cursor: pointer; color: rgba(255, 255, 255, 0.9); font-weight: 600;" title="点击有惊喜">米博宇</span> |
            📧 联系邮箱：<a href="mailto:miboyu@yeah.net" style="color: rgba(255, 255, 255, 0.9); text-decoration: none;" title="反馈意见">miboyu@yeah.net</a> |
            🕒 更新时间：2025-01-08</p>
-        <p class="visit-counter" id="visitCounter">
-            📊 网站访问量：加载中...
-        </p>
     </div>
 
     <script>
-        // 访问统计初始化
-        function initVisitCounter() {
-            const counterContainer = document.getElementById('visitCounter');
-
-            // 检测是否是本地文件打开
-            const isLocalFile = window.location.protocol === 'file:';
-
-            if (isLocalFile) {
-                console.warn('⚠️ 本地文件模式：GitHub 访问统计仅在 HTTP/HTTPS 访问时可用');
-
-                // 本地模式显示
-                if (counterContainer) {
-                    counterContainer.innerHTML = `
-                        📊 访问统计：<span style="color: rgba(255, 255, 255, 0.7);">本地模式不可用</span>
-                        <span style="margin-left: 15px; font-size: 0.85em; opacity: 0.6;">
-                            💡 部署到 GitHub Pages 后可查看真实访问数据
-                        </span>
-                    `;
-                }
-                return;
-            }
-
-            // 网络模式：显示 GitHub 访问统计徽章
-            if (counterContainer) {
-                counterContainer.innerHTML = `
-                    📊 网站访问量：
-                    <a href="https://hits.dwyl.com/miboyu/WebPageTools" target="_blank">
-                        <img src="https://hits.dwyl.com/miboyu/WebPageTools.svg" alt="Hits" style="vertical-align: middle; margin: 0 5px;">
-                    </a>
-                `;
-            }
-        }
-
-        // 本地访问统计（用于调试）
-        function updateVisitCounter() {
-            const counterKey = 'siteVisitCount';
-            const lastVisitKey = 'lastVisitDate';
-
-            const today = new Date().toDateString();
-            let visitCount = parseInt(localStorage.getItem(counterKey) || '0');
-            const lastVisit = localStorage.getItem(lastVisitKey);
-
-            if (lastVisit !== today) {
-                visitCount++;
-                localStorage.setItem(counterKey, visitCount.toString());
-                localStorage.setItem(lastVisitKey, today);
-            }
-
-            console.log('📊 本地访问统计：', visitCount, '次');
-        }
-
         // 显示古诗名句 - 移到全局作用域
         function showPoemToast(poem) {
             const toast = document.createElement('div');
@@ -783,10 +729,8 @@
             }
         }
 
-        // 页面加载时更新访问统计
+        // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
-            initVisitCounter();     // 初始化访问统计
-            updateVisitCounter();    // 更新本地统计
             initEasterEggs();       // 初始化彩蛋功能
         });
 
