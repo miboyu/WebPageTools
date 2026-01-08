@@ -365,10 +365,47 @@
             script.onload = function() {
                 console.log('✅ 不蒜子统计加载成功');
 
-                // 添加加载完成的样式
-                document.querySelectorAll('.busuanzi_value_page_pv, .busuanzi_value_site_pv, .busuanzi_value_site_uv').forEach(el => {
-                    el.style.opacity = '1';
-                });
+                // 等待不蒜子更新数据（最多等待5秒）
+                let checkCount = 0;
+                const maxChecks = 10;
+
+                const checkInterval = setInterval(() => {
+                    checkCount++;
+
+                    // 检查数据是否已更新
+                    const pvElement = document.querySelector('.busuanzi_value_page_pv');
+                    const sitePvElement = document.querySelector('.busuanzi_value_site_pv');
+                    const uvElement = document.querySelector('.busuanzi_value_site_uv');
+
+                    const hasData = pvElement && pvElement.textContent !== '加载中...' &&
+                                   sitePvElement && sitePvElement.textContent !== '加载中...' &&
+                                   uvElement && uvElement.textContent !== '加载中...';
+
+                    if (hasData) {
+                        console.log('✅ 不蒜子数据已更新');
+                        clearInterval(checkInterval);
+
+                        // 添加加载完成的样式
+                        document.querySelectorAll('.busuanzi_value_page_pv, .busuanzi_value_site_pv, .busuanzi_value_site_uv').forEach(el => {
+                            el.style.opacity = '1';
+                        });
+                    } else if (checkCount >= maxChecks) {
+                        // 超时未更新
+                        console.warn('⚠️ 不蒜子数据更新超时，可能需要：\n  1. 访问不蒜子官网注册域名\n  2. 等待一段时间让服务器初始化\n  3. 检查网络连接');
+                        clearInterval(checkInterval);
+
+                        // 显示提示信息
+                        if (pvElement && pvElement.textContent === '加载中...') {
+                            pvElement.textContent = '等待数据';
+                        }
+                        if (sitePvElement && sitePvElement.textContent === '加载中...') {
+                            sitePvElement.textContent = '等待数据';
+                        }
+                        if (uvElement && uvElement.textContent === '加载中...') {
+                            uvElement.textContent = '等待数据';
+                        }
+                    }
+                }, 500);
             };
 
             script.onerror = function() {
