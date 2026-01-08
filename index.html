@@ -319,33 +319,134 @@
            📧 联系邮箱：<a href="mailto:miboyu@yeah.net" style="color: rgba(255, 255, 255, 0.9); text-decoration: none;" title="反馈意见">miboyu@yeah.net</a> |
            🕒 更新时间：2025-01-08</p>
         <p class="visit-counter">
-            📊 网站访问统计：<span id="visitCount">加载中...</span>
+            <span id="busuanzi_container_page_pv">
+                📊 本页总访问量：<span class="busuanzi_value_page_pv">加载中...</span> 次
+            </span>
+            <span style="margin: 0 15px;">|</span>
+            <span id="busuanzi_container_site_pv">
+                🌐 网站总访问量：<span class="busuanzi_value_site_pv">加载中...</span> 次
+            </span>
+            <span style="margin: 0 15px;">|</span>
+            <span id="busuanzi_container_site_uv">
+                👥 网站访客数：<span class="busuanzi_value_site_uv">加载中...</span> 人
+            </span>
         </p>
     </div>
 
     <script>
-        // 网站访问统计功能
+        // 不蒜子访问统计
+        function initBusuanzi() {
+            // 检测是否是本地文件打开
+            const isLocalFile = window.location.protocol === 'file:';
+
+            if (isLocalFile) {
+                console.warn('⚠️ 本地文件模式：不蒜子统计仅在通过 HTTP/HTTPS 访问时可用');
+
+                // 本地模式下，显示简单的提示信息
+                const counterContainer = document.querySelector('.visit-counter');
+                if (counterContainer) {
+                    counterContainer.innerHTML = `
+                        <span style="opacity: 0.8;">
+                            📊 访问统计：<span style="color: rgba(255, 255, 255, 0.7);">本地模式不可用</span>
+                            <span style="margin-left: 15px; font-size: 0.85em; opacity: 0.6;">
+                                💡 部署到 GitHub Pages 后可查看真实访问数据
+                            </span>
+                        </span>
+                    `;
+                }
+                return; // 本地模式不加载不蒜子
+            }
+
+            // 异步加载不蒜子脚本
+            const script = document.createElement('script');
+            script.src = '//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
+            script.async = true;
+
+            script.onload = function() {
+                console.log('✅ 不蒜子统计加载成功');
+
+                // 添加加载完成的样式
+                document.querySelectorAll('.busuanzi_value_page_pv, .busuanzi_value_site_pv, .busuanzi_value_site_uv').forEach(el => {
+                    el.style.opacity = '1';
+                });
+            };
+
+            script.onerror = function() {
+                console.error('❌ 不蒜子统计加载失败');
+
+                const pvContainer = document.getElementById('busuanzi_container_page_pv');
+                const sitePvContainer = document.getElementById('busuanzi_container_site_pv');
+                const uvContainer = document.getElementById('busuanzi_container_site_uv');
+
+                if (pvContainer) pvContainer.innerHTML = '📊 本页总访问量：网络加载失败';
+                if (sitePvContainer) sitePvContainer.innerHTML = '🌐 网站总访问量：网络加载失败';
+                if (uvContainer) uvContainer.innerHTML = '👥 网站访客数：网络加载失败';
+            };
+
+            document.body.appendChild(script);
+        }
+
+        // 本地访问统计（增强版，保留作为补充）
         function updateVisitCounter() {
             const counterKey = 'siteVisitCount';
             const lastVisitKey = 'lastVisitDate';
+            const firstVisitKey = 'firstVisitDate';
+            const visitHistoryKey = 'visitHistory';
+            const consecutiveDaysKey = 'consecutiveDays';
+
             const today = new Date().toDateString();
+            const now = new Date();
+            const nowStr = now.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
             // 获取当前访问次数
             let visitCount = parseInt(localStorage.getItem(counterKey) || '0');
             const lastVisit = localStorage.getItem(lastVisitKey);
+            const firstVisit = localStorage.getItem(firstVisitKey);
+
+            // 获取访问历史
+            let visitHistory = JSON.parse(localStorage.getItem(visitHistoryKey) || '[]');
+
+            // 计算连续访问天数
+            let consecutiveDays = parseInt(localStorage.getItem(consecutiveDaysKey) || '0');
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toDateString();
 
             // 检查是否是今天第一次访问
             if (lastVisit !== today) {
                 visitCount++;
                 localStorage.setItem(counterKey, visitCount.toString());
                 localStorage.setItem(lastVisitKey, today);
+
+                // 记录首次访问时间
+                if (!firstVisit) {
+                    localStorage.setItem(firstVisitKey, nowStr);
+                }
+
+                // 更新访问历史（保留最近7条）
+                visitHistory.unshift({ date: nowStr, count: visitCount });
+                if (visitHistory.length > 7) {
+                    visitHistory = visitHistory.slice(0, 7);
+                }
+                localStorage.setItem(visitHistoryKey, JSON.stringify(visitHistory));
+
+                // 计算连续访问天数
+                if (lastVisit === yesterdayStr) {
+                    consecutiveDays++;
+                } else if (lastVisit !== today) {
+                    // 中断了，重新计算
+                    consecutiveDays = 1;
+                }
+                localStorage.setItem(consecutiveDaysKey, consecutiveDays.toString());
             }
 
-            // 更新显示
-            const visitCountElement = document.getElementById('visitCount');
-            if (visitCountElement) {
-                visitCountElement.textContent = `${visitCount} 次访问 (今日第${lastVisit === today ? 1 : '首次'}访问)`;
-            }
+            // 本地数据仅在控制台输出，不显示在页面上
+            console.log('📊 本地访问统计：');
+            console.log(`   总访问次数：${visitCount} 次`);
+            console.log(`   连续访问：${consecutiveDays} 天`);
+            console.log(`   首次访问：${firstVisit || nowStr}`);
+            console.log(`   上次访问：${lastVisit || '首次'}`);
+            console.log(`   本次状态：${lastVisit === today ? '欢迎回来！' : '今日首次访问'}`);
         }
 
         // 显示古诗名句 - 移到全局作用域
@@ -758,8 +859,9 @@
 
         // 页面加载时更新访问统计
         document.addEventListener('DOMContentLoaded', function() {
-            updateVisitCounter();
-            initEasterEggs();
+            initBusuanzi();        // 初始化不蒜子统计
+            updateVisitCounter();    // 更新本地统计
+            initEasterEggs();       // 初始化彩蛋功能
         });
 
         // 添加卡片点击涟漪效果 - 排除敬请期待卡片
