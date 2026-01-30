@@ -656,16 +656,19 @@
         }
 
         .toast {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(30, 30, 30, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             border-radius: var(--radius-md);
-            box-shadow: var(--shadow-lg);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             margin-bottom: 12px;
             padding: 18px 24px;
             transform: translateX(120%);
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-left: 4px solid var(--primary-color);
             display: flex;
             align-items: center;
@@ -681,22 +684,22 @@
 
         .toast.success {
             border-left-color: #48bb78;
-            background: linear-gradient(135deg, rgba(72, 187, 120, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+            background: rgba(30, 30, 30, 0.65);
         }
 
         .toast.error {
             border-left-color: #f56565;
-            background: linear-gradient(135deg, rgba(245, 101, 101, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+            background: rgba(30, 30, 30, 0.65);
         }
 
         .toast.info {
             border-left-color: var(--primary-color);
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+            background: rgba(30, 30, 30, 0.65);
         }
 
         .toast.warning {
             border-left-color: #ed8936;
-            background: linear-gradient(135deg, rgba(237, 137, 54, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+            background: rgba(30, 30, 30, 0.65);
         }
 
         .toast-content {
@@ -704,7 +707,7 @@
             margin-right: 12px;
             white-space: pre-line;
             font-weight: 500;
-            color: #2d3748;
+            color: rgba(255, 255, 255, 0.95);
         }
 
         .toast-actions {
@@ -718,7 +721,7 @@
             border: none;
             font-size: 20px;
             cursor: pointer;
-            color: #718096;
+            color: rgba(255, 255, 255, 0.7);
             padding: 0;
             width: 24px;
             height: 24px;
@@ -730,8 +733,8 @@
         }
 
         .toast-close:hover {
-            color: #2d3748;
-            background: rgba(0, 0, 0, 0.05);
+            color: rgba(255, 255, 255, 1);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .toast-cancel-btn {
@@ -920,25 +923,27 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
             -webkit-animation-name: fadeIn;
             animation-name: fadeIn;
             -webkit-animation-duration: 0.3s;
             animation-duration: 0.3s;
         }
         .help-modal-content {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             margin: 5% auto;
             padding: 28px 36px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             width: 80%;
             max-width: 800px;
             border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-lg);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             -webkit-animation-name: slideIn;
             animation-name: slideIn;
             -webkit-animation-duration: 0.3s;
@@ -948,21 +953,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             padding-bottom: 16px;
             margin-bottom: 24px;
         }
         .help-modal-header h2 {
             margin: 0;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: rgba(255, 255, 255, 0.95);
             font-weight: 700;
             font-size: 1.5rem;
         }
         .help-modal-close {
-            color: #a0aec0;
+            color: rgba(255, 255, 255, 0.7);
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
@@ -976,26 +978,23 @@
         }
         .help-modal-close:hover,
         .help-modal-close:focus {
-            color: #e74c3c;
-            background: rgba(231, 76, 60, 0.1);
+            color: rgba(255, 255, 255, 1);
+            background: rgba(255, 255, 255, 0.1);
         }
         .help-modal-body {
             max-height: 60vh;
             overflow-y: auto;
             line-height: 1.7;
-            color: #4a5568;
+            color: rgba(255, 255, 255, 0.85);
         }
         .help-modal-body h3 {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: rgba(255, 255, 255, 0.95);
             margin-top: 24px;
             font-weight: 600;
             font-size: 1.1rem;
         }
         .help-modal-body h4 {
-            color: #2d3748;
+            color: rgba(255, 255, 255, 0.9);
             margin-top: 16px;
             font-weight: 600;
         }
@@ -1003,12 +1002,12 @@
             margin-bottom: 12px;
         }
         .help-modal-body code {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            background: rgba(255, 255, 255, 0.1);
             padding: 3px 8px;
             border-radius: var(--radius-sm);
             font-family: 'SF Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
             font-size: 0.9em;
-            color: var(--primary-color);
+            color: rgba(150, 200, 255, 0.95);
             font-weight: 500;
         }
         .help-modal-body ul {
@@ -1018,7 +1017,7 @@
             margin-bottom: 10px;
         }
         .help-modal-body pre {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            background: rgba(0, 0, 0, 0.3);
             padding: 16px;
             border-radius: var(--radius-md);
             border: 1px solid rgba(102, 126, 234, 0.1);
@@ -1040,8 +1039,9 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
             -webkit-backdrop-filter: blur(4px);
             -webkit-animation-name: fadeIn;
             animation-name: fadeIn;
@@ -1050,16 +1050,18 @@
         }
 
         .time-series-modal-content {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(30, 30, 30, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             margin: 3% auto;
             padding: 28px 36px;
-            border: 1px solid rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             width: 80%;
             max-width: 900px;
             border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-lg);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             -webkit-animation-name: slideIn;
             animation-name: slideIn;
             -webkit-animation-duration: 0.3s;
@@ -1070,23 +1072,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             padding-bottom: 16px;
             margin-bottom: 24px;
         }
 
         .time-series-modal-header h3 {
             margin: 0;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: rgba(255, 255, 255, 0.95);
             font-weight: 700;
             font-size: 1.4rem;
         }
 
         .time-series-modal-close {
-            color: #a0aec0;
+            color: rgba(255, 255, 255, 0.7);
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
@@ -1101,8 +1100,8 @@
 
         .time-series-modal-close:hover,
         .time-series-modal-close:focus {
-            color: #e74c3c;
-            background: rgba(231, 76, 60, 0.1);
+            color: rgba(255, 255, 255, 1);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .time-series-modal-body {
@@ -1113,26 +1112,26 @@
         .time-series-info {
             margin-bottom: 20px;
             padding: 16px 20px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: var(--radius-md);
             font-size: 14px;
-            color: #4a5568;
-            border: 1px solid rgba(102, 126, 234, 0.1);
+            color: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .time-series-info span {
             font-weight: 600;
-            color: #2d3748;
+            color: rgba(255, 255, 255, 0.95);
         }
 
         .time-series-chart-container {
             position: relative;
             width: 100%;
             height: 400px;
-            border: 1px solid rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: var(--radius-md);
-            background: rgba(255, 255, 255, 0.35);
-            box-shadow: var(--shadow-sm);
+            background: rgba(20, 20, 20, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
         #timeSeriesChart {
@@ -1147,8 +1146,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(102, 126, 234, 0.15);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
             z-index: 9998;
             display: none;
             justify-content: center;
@@ -1163,15 +1163,20 @@
         }
 
         .global-drop-overlay .drop-hint {
-            background: var(--primary-gradient);
-            color: white;
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            color: rgba(255, 255, 255, 0.95);
             padding: 40px 60px;
             border-radius: var(--radius-xl);
             font-size: 26px;
             font-weight: 700;
             text-align: center;
-            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
-            border: 3px dashed rgba(255, 255, 255, 0.6);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-style: dashed;
             animation: pulse 1.5s infinite;
         }
 
@@ -1203,14 +1208,15 @@
             gap: 12px;
             margin-top: 12px;
             padding-top: 12px;
-            border-top: 1px solid rgba(102, 126, 234, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .time-series-stats div {
             padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: var(--radius-sm);
             font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
         }
 
         /* 切换背景按钮 - 液态玻璃效果 */
