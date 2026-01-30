@@ -249,7 +249,7 @@
             padding: 24px;
             background:
                 linear-gradient(135deg, rgba(245, 247, 250, 0.75) 0%, rgba(228, 237, 245, 0.75) 50%, rgba(240, 244, 248, 0.75) 100%),
-                var(--bg-image, url('https://w.wallhaven.cc/full/2y/wallhaven-2yo7y9.png'));
+                var(--bg-image, none);
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -1213,60 +1213,104 @@
             font-size: 13px;
         }
 
-        /* 图片来源标注 */
-        .bg-source {
-            position: fixed;
-            bottom: 12px;
-            right: 12px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.8);
-            background: rgba(0, 0, 0, 0.4);
-            padding: 6px 12px;
-            border-radius: 16px;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-        .bg-source:hover {
-            background: rgba(0, 0, 0, 0.6);
-            color: rgba(255, 255, 255, 1);
-        }
-        .bg-source a {
-            color: rgba(102, 200, 255, 0.9);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        .bg-source a:hover {
-            color: rgba(150, 220, 255, 1);
-            text-decoration: underline;
-        }
-
-        /* 切换背景按钮 */
+        /* 切换背景按钮 - 液态玻璃效果 */
         .change-bg-btn {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: var(--radius-md);
+            bottom: 16px;
+            right: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(30, 30, 30, 0.6);
+            color: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 10px 16px;
+            border-radius: 24px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            font-size: 13px;
+            font-weight: 500;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow:
+                0 4px 24px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            white-space: nowrap;
+            z-index: 1000;
         }
         .change-bg-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            background: rgba(50, 50, 50, 0.7);
+            transform: translateY(-1px);
+            box-shadow:
+                0 6px 28px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
         .change-bg-btn:active {
             transform: translateY(0);
+            background: rgba(20, 20, 20, 0.7);
+        }
+
+        /* 图片来源链接图标容器 */
+        .bg-source-icon-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+        .bg-source-icon-wrapper:hover .bg-source-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 图片来源图标（emoji） */
+        .bg-source-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+        .bg-source-icon:hover {
+            transform: scale(1.15);
+        }
+
+        /* 提示信息（固定不旋转） */
+        .bg-source-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 11px;
+            border-radius: 6px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .bg-source-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.8);
+        }
+
+        /* 加载动画 - 只作用于图标 */
+        .bg-source-icon.loading {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         /* 响应式优化 */
@@ -1355,16 +1399,37 @@
             ];
 
             let currentImageId = null;
+            let isLoading = false;
 
-            function loadRandomImage(attempts, excludeId) {
+            // 从 sessionStorage 读取当前背景
+            const savedBgUrl = sessionStorage.getItem('currentBgUrl');
+            const savedBgId = sessionStorage.getItem('currentBgId');
+
+            // 首次进入：有缓存显示缓存，无缓存显示纯色然后加载
+            if (savedBgUrl && savedBgId) {
+                document.body.style.setProperty('--bg-image', savedBgUrl);
+                currentImageId = savedBgId;
+                updateSourceLink(savedBgId);
+            }
+
+            function loadRandomImage(attempts, excludeId, isManualSwitch = false) {
+                if (isLoading) return;
+                isLoading = true;
+
+                // 显示加载状态
+                if (isManualSwitch) {
+                    showLoadingState();
+                }
+
                 if (attempts <= 0) {
-                    console.warn('无法加载背景图片，使用默认背景');
-                    document.body.style.setProperty('--bg-image', 'none');
-                    updateSourceLink(null);
+                    console.warn('无法加载背景图片');
+                    isLoading = false;
+                    if (isManualSwitch) {
+                        hideLoadingState();
+                    }
                     return;
                 }
 
-                // 过滤掉当前图片，避免重复
                 const availableImages = excludeId
                     ? landscapeImages.filter(img => img.id !== excludeId)
                     : landscapeImages;
@@ -1377,46 +1442,80 @@
                 const img = new Image();
 
                 img.onload = function() {
-                    document.body.style.setProperty('--bg-image', `url('${randomImage.url}')`);
+                    const bgUrl = `url('${randomImage.url}')`;
+                    document.body.style.setProperty('--bg-image', bgUrl);
                     currentImageId = randomImage.id;
                     updateSourceLink(randomImage.id);
+                    sessionStorage.setItem('currentBgUrl', bgUrl);
+                    sessionStorage.setItem('currentBgId', randomImage.id);
+                    isLoading = false;
+                    if (isManualSwitch) {
+                        hideLoadingState();
+                    }
                 };
 
                 img.onerror = function() {
                     console.warn(`图片加载失败: ${randomImage.url}，尝试下一个...`);
-                    loadRandomImage(attempts - 1, excludeId);
+                    loadRandomImage(attempts - 1, excludeId, isManualSwitch);
                 };
 
                 img.src = randomImage.url;
             }
 
-            function updateSourceLink(imageId) {
-                const bgSourceLink = document.getElementById('bgSourceLink');
-                if (bgSourceLink) {
-                    if (imageId) {
-                        bgSourceLink.href = `https://wallhaven.cc/w/${imageId}`;
-                        bgSourceLink.textContent = `wallhaven.cc/w/${imageId}`;
+            function showLoadingState() {
+                const icon = document.getElementById('bgSourceIcon');
+                const tooltip = document.getElementById('bgSourceTooltip');
+                if (icon) {
+                    icon.textContent = '⏳';
+                    icon.classList.add('loading');
+                }
+                if (tooltip) {
+                    tooltip.textContent = '正在加载新背景，请耐心等候😊';
+                }
+            }
+
+            function hideLoadingState() {
+                const icon = document.getElementById('bgSourceIcon');
+                const tooltip = document.getElementById('bgSourceTooltip');
+                if (icon) {
+                    icon.textContent = '🖼️';
+                    icon.classList.remove('loading');
+                }
+                if (tooltip) {
+                    if (currentImageId) {
+                        tooltip.textContent = `打开图片源: wallhaven.cc/w/${currentImageId}`;
                     } else {
-                        bgSourceLink.href = 'https://wallhaven.cc';
-                        bgSourceLink.textContent = 'wallhaven.cc';
+                        tooltip.textContent = '打开图片源';
                     }
                 }
             }
 
-            function changeBackground() {
-                loadRandomImage(5, currentImageId);
+            function updateSourceLink(imageId) {
+                const icon = document.getElementById('bgSourceIcon');
+                const tooltip = document.getElementById('bgSourceTooltip');
+                if (icon && imageId) {
+                    icon.href = `https://wallhaven.cc/w/${imageId}`;
+                }
+                if (tooltip && imageId) {
+                    tooltip.textContent = `打开图片源: wallhaven.cc/w/${imageId}`;
+                }
             }
 
-            // 初始化加载
-            loadRandomImage(5);
+            function changeBackground() {
+                if (isLoading) return;
+                loadRandomImage(5, currentImageId, true);
+            }
 
-            // 暴露公共接口
+            // 初始化：如果没有背景（首次进入），加载一张
+            if (!savedBgUrl) {
+                loadRandomImage(5);
+            }
+
             return {
                 changeBackground: changeBackground
             };
         })();
     </script>
-    <button class="change-bg-btn" onclick="window.bgManager.changeBackground()" title="切换背景图片">🖼️ 切换背景</button>
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- 全局拖放覆盖层 -->
@@ -6392,9 +6491,12 @@ Static_Line_B, 15, 15, 15, 15, 15
         });
     </script>
 
-    <!-- 图片来源标注 -->
-    <div class="bg-source">
-        图片来源：<a id="bgSourceLink" href="https://wallhaven.cc" target="_blank" rel="noopener noreferrer">https://wallhaven.cc</a>
-    </div>
+    <button class="change-bg-btn" onclick="window.bgManager.changeBackground()" title="切换背景图片">
+        <span class="bg-source-icon-wrapper" id="bgSourceWrapper">
+            <a id="bgSourceIcon" class="bg-source-icon" href="https://wallhaven.cc" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">🖼️</a>
+            <span class="bg-source-tooltip" id="bgSourceTooltip">打开图片源</span>
+        </span>
+        切换背景
+    </button>
 </body>
 </html>
